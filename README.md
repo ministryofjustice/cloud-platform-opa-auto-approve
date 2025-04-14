@@ -1,70 +1,151 @@
-# Ministry of Justice Template Repository
+# Cloud Platform OPA Auto Approve Policy
 
-[![Ministry of Justice Repository Compliance Badge](https://github-community.service.justice.gov.uk/repository-standards/api/template-repository/badge)](https://github-community.service.justice.gov.uk/repository-standards/template-repository)
+[![Ministry of Justice Repository Compliance Badge](https://github-community.service.justice.gov.uk/repository-standards/api/cloud-platform-opa-auto-approve/badge)](https://github-community.service.justice.gov.uk/repository-standards/cloud-platform-opa-auto-approve)
 
-This template repository equips you with the default initial files required for a Ministry of Justice GitHub repository.
+## Overview
 
-## Included Files
+The **OPA Auto Approve Policy** framework automates the validation and approval of Terraform pull requests (PRs). This framework ensures compliance with predefined rules and security standards before auto-approving changes to the infrastructure.
 
-The repository comes with the following preset files:
+### Key Workflows
 
-- LICENSE
-- .gitignore
-- CODEOWNERS
-- dependabot.yml
-- GitHub Actions example files
-- Ministry of Justice Compliance Badge (public repositories only)
+1. **OPA Validation Against Terraform Plans**:
 
-## Setup Instructions
+   - Validates PRs with Terraform changes using the `plan-live` job in the Concourse CI pipeline.
+   - Automatically approves compliant changes or flags them for manual review.
 
-Once you've created your repository using this template, ensure the following steps:
+2. **OPA Policy Testing**:
+   - Uses the `opa-app-test.yml` GitHub Action in the `cloud-platform-environments` repository.
+   - Validates the OPA auto-approve policies to ensure they work as expected.
 
-### Update README
+## How It Works
 
-Edit this README.md file to document your project accurately. Take the time to create a clear, engaging, and informative README.md file. Include information like what your project does, how to install and run it, how to contribute, and any other pertinent details.
+### OPA Validation Against Terraform Plans Steps:
 
-### Update repository description
+1. **Terraform Plan Generation**:
 
-After you've created your repository, GitHub provides a brief description field that appears on the top of your repository's main page. This is a summary that gives visitors quick insight into the project. Using this field to provide a succinct overview of your repository is highly recommended.
+   - The `cloud-platform-cli` command generates a Terraform plan (`plan-<namespace>.out`) for the PR changes.
 
-This description and your README.md will be one of the first things people see when they visit your repository. It's a good place to make a strong, concise first impression. Remember, this is often visible in search results on GitHub and search engines, so it's also an opportunity to help people discover your project.
+2. **Plan Conversion**:
 
-### Grant Team Permissions
+   - The Terraform plan binary is converted to a JSON format for policy validation.
 
-Assign permissions to the appropriate Ministry of Justice teams. Ensure at least one team is granted Admin permissions. Whenever possible, assign permissions to teams rather than individual users.
+3. **OPA Policy Validation**:
 
-Prefer to user GitHub Teams over individual access to repositories. Where appropriate, ensure GitHub Teams used are related to a Parent Team associated with a Business Unit to help ensure ownership can be easily identified.
+   - The JSON output is evaluated against OPA policies:
+     - Ensures adherence to OPA auto-approve policies.
+     - Confirms no YAML file changes exist outside the `resources/` directory of the namespace.
 
-### Read about the GitHub repository standards
+4. **PR Review and Approval**:
+   - **If Validation Passes**:
+     - The PR is automatically approved using the GitHub API.
+   - **If Validation Fails**:
+     - A comment is added to the PR with failure reasons and a request for manual review.
 
-Familiarise yourself with the Ministry of Justice GitHub Repository Standards. These standards ensure consistency, maintainability, and best practices across all our repositories.
+## Policy Structure
 
-You can find the standards [here](https://github-community.service.justice.gov.uk/repository-standards/guidance).
+The policy framework is modular for scalability and maintainability:
 
-Please read and understand these standards thoroughly and enable them when you feel comfortable.
-
-### Modify the GitHub Standards Badge
-
-Once you've ensured that all the [GitHub Repository Standards](https://github-community.service.justice.gov.uk/repository-standards/guidance) have been applied to your repository, it's time to update the Ministry of Justice (MoJ) Compliance Badge located in the README file.
-
-The badge demonstrates that your repository is compliant with MoJ's standards.
-
-To update the badge, replace the `template-repository` in the badge URL with your repository's name. The badge URL should look like this:
-
-```markdown
-[![Ministry of Justice Repository Compliance Badge](https://github-community.service.justice.gov.uk/repository-standards/api/${your-repository-name}/badge)](https://github-community.service.justice.gov.uk/repository-standards/${your-reposistory-name})
+```
+.
+├── LICENSE
+├── modules
+│   ├── ecr
+│   │   ├── ecr_create.rego
+│   │   ├── main.rego
+│   │   └── tests
+│   │       ├── ecr_create_test.rego
+│   │       └── fixtures
+│   │           └── ecr_create.rego
+│   └── service_pod
+│       ├── main.rego
+│       ├── service_pod.rego
+│       └── tests
+│           ├── fixtures
+│           │   └── service_pod.rego
+│           └── service_pod_test.rego
+├── README.md
+└── scripts
+    └── auto_approve.sh
 ```
 
-**Please note** the badge will not function correctly if your repository is internal or private. In this case, you may remove the badge from your README.
+### Key Components
 
-### Update CODEOWNERS
+1. **`main.rego`**:
 
-(Optional) Modify the CODEOWNERS file to specify the teams or users authorized to approve pull requests.
+   - The primary entry point for the OPA policy, containing the overarching logic for auto-approval.
 
-### Configure Dependabot
+2. **`modules/`**:
 
-Adapt the dependabot.yml file to match your project's [dependency manager](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#package-ecosystem) and to enable [automated pull requests for package updates](https://docs.github.com/en/code-security/supply-chain-security).
+   - This folder contains resource-specific modules, each focusing on validating a specific resource type.
+   - Example: `service_pod.rego` handles validation for service pods module deploymet.
 
-### Dependency Review
+3. **Tests and Fixtures**:
+   - Each module includes:
+     - **Test File**: Validates the module’s OPA logic (e.g., `service_pod_test.rego`).
+     - **Fixtures**: Mock Terraform plan JSON files used for testing (e.g., `fixtures/service_pod.rego`).
 
-If your repository is private with no GitHub Advanced Security license, remove the `.github/workflows/dependency-review.yml` file.
+## Modularisation for Scalability
+
+The modular structure allows easy expansion of the framework. For example:
+
+- The **Service Pod module** is currently implemented with its own tests and mock data.
+- Future modules (e.g. S3, RDS, IAM) can be added under the `modules` directory with minimal changes to the main framework.
+
+This structure ensures that the policy remains organised and extensible.
+
+## Safety Nets
+
+To ensure the integrity of changes, the OPA Auto Approve Policy includes the following safeguards:
+
+- **Always Fail if IAM Changes Are Involved**:
+
+  - Changes to IAM policies or policy attachments will fail validation automatically.
+
+- **No Unauthorised Kubernetes YAML Changes**:
+
+  - Ensures no changes occur outside the Terraform configuration, particularly to Kubernetes YAML files.
+
+- **Excludes Specific Resources**:
+  - Validation ensures no changes occur to:
+    - IAM policies
+    - IAM policy attachments
+
+## How to Test Locally
+
+You need the [OPA CLI tool](https://www.openpolicyagent.org/docs/latest/cli/) for testing it locally.
+
+You can install it with the below commmand:
+
+```
+brew install opa
+```
+
+Execute the following commands in the `opa-auto-approve-policy` directory:
+
+1. **Manual Tests**:
+
+   - Run OPA validation against mock Terraform plans:
+     ```bash
+     opa exec --decision terraform/analysis/allow --bundle . <tf-json-filepath> --log-level info --log-format json-pretty
+     ```
+
+2. **Unit Tests**:
+
+   - Test the OPA policies using the built-in OPA testing framework:
+     ```bash
+     opa test . -v
+     ```
+
+3. **Format Code**:
+   - Format OPA files using the `opa fmt` command:
+     ```bash
+     opa fmt . -w
+     ```
+
+## Next Steps
+
+**Expanding Module Development**:
+
+- The framework is designed for modularisation, with the `service_pod` module already implemented as a foundation.
+- The next step will focus on developing additional modules for other resource types, such as S3, RDS, and IAM.
+- Each new module will include resource-specific validation logic, tests, and fixtures to ensure seamless integration into the existing framework.
