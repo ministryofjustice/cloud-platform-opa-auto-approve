@@ -16,7 +16,7 @@ do
     OUTPUT=$(opa exec --decision terraform/analysis/allow --bundle $dir "$JSON_FILE")
     OPA_RESULT=$(echo "$OUTPUT" | jq -r '.result[0].result.valid')
     OPA_MESSAGE=$(echo "$OUTPUT" | jq -r '.result[0].result.msg')
-    testname=$(echo "$dir" | sed 's/opa\-auto\-approve\-policy\///g' | sed 's/\///g')
+    testname=$(echo "$dir" | sed 's/cloud\-platform\-opa\-auto\-approve\///g' | sed 's/\///g')
     if [[ $OPA_RESULT == "true" ]]
     then
       testresult=":white_check_mark:"
