@@ -11,7 +11,7 @@ terraform -chdir="$PLAN_DIR" show -json "$PLAN_NAME" > "$JSON_FILE"
 
 results=()
 
-for dir in opa-auto-approve-policy/*/;
+for dir in cloud-platform-opa-auto-approve/*/;
 do
     OUTPUT=$(opa exec --decision terraform/analysis/allow --bundle $dir "$JSON_FILE")
     OPA_RESULT=$(echo "$OUTPUT" | jq -r '.result[0].result.valid')
