@@ -11,22 +11,16 @@ allow := {
 }
 
 res if {
+	touches_some_allowed
 	doesnt_touch_other_resources
-	not touches_iam_create
-	not touches_iam_update
-}
-
-res if {
 	doesnt_touch_other_modules
 	not touches_iam_create
 	not touches_iam_update
 }
 
 msg := "Valid changes the PR meets the module allowlist criteria for auto approval" if {
+	touches_some_allowed
 	doesnt_touch_other_resources
-	not touches_iam_create
-	not touches_iam_update
-} else := "Valid changes the PR meets the module allowlist criteria for auto approval" if {
 	doesnt_touch_other_modules
 	not touches_iam_create
 	not touches_iam_update
@@ -36,8 +30,16 @@ msg := "Valid changes the PR meets the module allowlist criteria for auto approv
 	touches_iam_update
 } else := "This PR includes changes to modules / resources which are not on the allowlist, so we can't auto approve these changes. Please request a Cloud Platform team member's review in [#ask-cloud-platform](https://moj.enterprise.slack.com/archives/C57UPMZLY)"
 
-doesnt_touch_other_modules if {
+touches_some_allowed if {
 	count(allowed_modules_addrs) > 0
+}
+
+touches_some_allowed if {
+	count(allowed_resources_addrs) > 0
+}
+
+doesnt_touch_other_modules if {
+	count(allowed_modules_addrs) >= 0
 
 	all_modules := [
 	res |
@@ -57,7 +59,7 @@ doesnt_touch_other_modules if {
 }
 
 doesnt_touch_other_resources if {
-	count(allowed_resources_addrs) > 0
+	count(allowed_resources_addrs) >= 0
 
 	all_resources := [
 	res |
