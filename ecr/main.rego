@@ -51,10 +51,6 @@ res |
 	is_ecr_resource(res)
 ]
 
-repo_name := tfplan.variables.namespace.value if {
-	tfplan.configuration.root_module.module_calls.ecr_expressions.repo_name.references[0] == "var.namespace"
-} else := tfplan.configuration.root_module.module_calls.ecr_expressions.repo_name.constant_value[0]
-
 ecr_create_ok if {
 	creates := [
 	res |
@@ -82,9 +78,18 @@ ecr_destroy_ok if {
 ecr_repo_rename_ok if {
 	every ecr in ecrs {
 		after := ecr.change.after.name
+		trimmed_addr := trim_left(ecr.module_address, `module`)
+		trim_dot := trim_left(trimmed_addr, `\.`)
+
+		repo_name := get_repo_name(trim_dot)
+
 		full_repo_name := sprintf("%s/%s", [tfplan.variables.team_name.value, repo_name])
 		after == full_repo_name
 	}
 }
 
 is_ecr_resource(res) if res.module_address in ecr_module_addrs
+
+get_repo_name(addr) := tfplan.variables.namespace.value if {
+	tfplan.configuration.root_module.module_calls[addr].expressions.repo_name.references[0] == "var.namespace"
+} else := tfplan.configuration.root_module.module_calls[addr].expressions.repo_name.constant_value[0]

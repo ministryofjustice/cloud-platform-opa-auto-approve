@@ -19,7 +19,7 @@ test_allow_if_op_update if {
 	}
 	res := analysis.allow with input as {
 		"variables": {"team_name": {"value": "jazz-test"}, "namespace": {"value": "jazz-test"}},
-		"configuration": {"root_module": {"module_calls": {"ecr_expressions": {"repo_name": {"references": ["var.namespace"]}}}}},
+		"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}}}}}},
 		"resource_changes": [modified_plan],
 	}
 
@@ -40,11 +40,42 @@ test_allow_if_op_update_changes_name if {
 
 	res := analysis.allow with input as {
 		"variables": {"team_name": {"value": "var.namespace"}, "namespace": {"value": "wrong-one"}},
-		"configuration": {"root_module": {"module_calls": {"ecr_expressions": {"repo_name": {"references": ["var.namespace"]}}}}},
+		"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}}}}}},
 		"resource_changes": [modified_plan, ecr_create_mock_tfplan.resource_changes],
 	}
 
 	res.msg == "NOTE: Terraform `team_name` / `repo_name` change detected. ECR repository names cannot be updated in place to reflect these changes. [See here](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/other-topics/aws-resource-naming-issue.html)"
+	res.valid == true
+}
+
+test_allow_if_op_update_multiple_ecr if {
+	modified_plan := {
+		"module_address": "module.ecr",
+		"type": "aws_ecr_repository",
+		"change": {
+			"actions": ["update"],
+			"before": {"name": "jazz-test"},
+			"after": {"name": "jazz-test/jazz-test"},
+		},
+	}
+
+	modified_plan_2 := {
+		"module_address": "module.ecr2",
+		"type": "aws_ecr_repository",
+		"change": {
+			"actions": ["update"],
+			"before": {"name": "jazz-test"},
+			"after": {"name": "jazz-test/jazz-test"},
+		},
+	}
+
+	res := analysis.allow with input as {
+		"variables": {"team_name": {"value": "jazz-test"}, "namespace": {"value": "jazz-test"}},
+		"configuration": {"root_module": {"module_calls": {"ecr2": {"expressions": {"repo_name": {"references": ["var.namespace"]}}}, "ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}}}}}},
+		"resource_changes": [modified_plan],
+	}
+
+	res.msg == "Valid ECR related terraform changes"
 	res.valid == true
 }
 
@@ -61,7 +92,7 @@ test_allow_if_op_destroy if {
 
 	res := analysis.allow with input as {
 		"variables": {"team_name": {"value": "jazz-test"}, "namespace": {"value": "jazz-test"}},
-		"configuration": {"root_module": {"module_calls": {"ecr_expressions": {"repo_name": {"references": ["var.namespace"]}}}}},
+		"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}}}}}},
 		"resource_changes": [modified_plan, ecr_create_mock_tfplan.resource_changes],
 	}
 	res.msg == "Valid ECR related terraform changes"
@@ -81,7 +112,7 @@ test_allow_if_op_destroy_with_no_protect if {
 
 	res := analysis.allow with input as {
 		"variables": {"team_name": {"value": "jazz-test"}, "namespace": {"value": "jazz-test"}},
-		"configuration": {"root_module": {"module_calls": {"ecr_expressions": {"repo_name": {"references": ["var.namespace"]}}}}},
+		"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}}}}}},
 		"resource_changes": [modified_plan, ecr_create_mock_tfplan.resource_changes],
 	}
 	res.valid == true
@@ -101,7 +132,7 @@ test_deny_if_op_destroy if {
 
 	res := analysis.allow with input as {
 		"variables": {"team_name": {"value": "jazz-test"}, "namespace": {"value": "jazz-test"}},
-		"configuration": {"root_module": {"module_calls": {"ecr_expressions": {"repo_name": {"references": ["var.namespace"]}}}}},
+		"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}}}}}},
 		"resource_changes": [modified_plan, ecr_create_mock_tfplan.resource_changes],
 	}
 
@@ -125,7 +156,7 @@ test_allow_if_op_module_rename if {
 
 	res := analysis.allow with input as {
 		"variables": {"team_name": {"value": "changed"}, "namespace": {"value": "jazz-test"}},
-		"configuration": {"root_module": {"module_calls": {"ecr_expressions": {"repo_name": {"references": ["var.namespace"]}}}}},
+		"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}}}}}},
 		"resource_changes": [modified_plan, ecr_create_mock_tfplan.resource_changes],
 	}
 

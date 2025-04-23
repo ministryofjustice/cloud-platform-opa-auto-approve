@@ -20,10 +20,10 @@ The **OPA Auto Approve Policy** framework automates the validation and approval 
 1. Create your new module directory and folder structure following the policy structure below
 2. Plan your policy out carefully with pseudo code
 3. Write your policy using the other modules for reference (be careful to not to be caught out by dynamic terraform module naming in the plan eg. `module.ecr` is not a good basis for selecting resources as the module name doesn't have to be "ecr" instead get a resource which is concrete in the module and work backwards to the `module.address`)
-4. Generate a mock tf plan for testing (out a tf plan to json and pull out the relevant fields)
+4. Generate a mock tf plan for testing (use a real tf plan output to json and pull out the relevant fields)
 5. Ensure you have **complete** test coverage `opa test . -v` (use [print()](https://www.openpolicyagent.org/docs/latest/debugging/#using-the-print-built-in-function) to debug your values along the way)
 6. Use your tfplan.json to test against the module with `opa exec --decision terraform/analysis/allow --bundle . <path-to-tf-plan>.json --log-level info --log-format json-pretty`
-7. Once you're happy with your module, add the module to the `module_allowlist` module
+7. Once you're happy with your module, add the module or resources to the relevant `allowlist` file
 
 ## How It Works
 
