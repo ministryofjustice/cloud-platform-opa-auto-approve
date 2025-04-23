@@ -44,7 +44,7 @@ test_allow_if_op_update_changes_name if {
 		"resource_changes": [modified_plan, ecr_create_mock_tfplan.resource_changes],
 	}
 
-	res.msg == "NOTE: Terraform `team_name` / `repo_name` change detected. ECR repository names cannot be updated in place to reflect these changes.[see here](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/other-topics/aws-resource-naming-issue.html)"
+	res.msg == "NOTE: Terraform `team_name` / `repo_name` change detected. ECR repository names cannot be updated in place to reflect these changes. [See here](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/other-topics/aws-resource-naming-issue.html)"
 	res.valid == true
 }
 
@@ -130,7 +130,7 @@ test_allow_if_op_module_rename if {
 	}
 
 	res.valid == true
-	res.msg == "NOTE: Terraform `team_name` / `repo_name` change detected. ECR repository names cannot be updated in place to reflect these changes.[see here](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/other-topics/aws-resource-naming-issue.html)"
+	res.msg == "NOTE: Terraform `team_name` / `repo_name` change detected. ECR repository names cannot be updated in place to reflect these changes. [See here](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/other-topics/aws-resource-naming-issue.html)"
 }
 
 test_allow_if_does_not_contain_ecr if {

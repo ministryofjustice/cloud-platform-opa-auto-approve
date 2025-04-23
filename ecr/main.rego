@@ -29,7 +29,7 @@ msg := "We can't auto approve these ECR terraform changes. Please request a Clou
 	not ecr_create_ok
 } else := "We can't auto approve these ECR terraform changes. Please request a Cloud Platform team member's review in [#ask-cloud-platform](https://moj.enterprise.slack.com/archives/C57UPMZLY)" if {
 	not ecr_destroy_ok
-} else := "NOTE: Terraform `team_name` / `repo_name` change detected. ECR repository names cannot be updated in place to reflect these changes.[see here](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/other-topics/aws-resource-naming-issue.html)" if {
+} else := "NOTE: Terraform `team_name` / `repo_name` change detected. ECR repository names cannot be updated in place to reflect these changes. [See here](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/other-topics/aws-resource-naming-issue.html)" if {
 	not ecr_repo_rename_ok
 } else := "Valid ECR related terraform changes" if {
 	ecr_create_ok
