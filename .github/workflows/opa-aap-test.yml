@@ -2,8 +2,6 @@ on:
   workflow_dispatch:
   pull_request:
     types: [opened, edited, reopened, synchronize]
-    paths:
-      - './**'
 
 name: OPA Auto Approve Policy Tests
 jobs:
