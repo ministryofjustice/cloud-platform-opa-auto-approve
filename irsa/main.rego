@@ -39,7 +39,8 @@ res |
 irsa_ok if {
 	every ma in irsa {
 		trimmed_addr := trim_left(ma, "module.")
-		role_policy_arns := tfplan.configuration.root_module.module_calls[trimmed_addr].role_policy_arns.references
+		role_policy_arns := tfplan.configuration.root_module.module_calls[trimmed_addr].expressions.role_policy_arns.references
+
 		count(role_policy_arns) > 0
 	}
 

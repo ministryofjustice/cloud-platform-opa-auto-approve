@@ -39,37 +39,27 @@ touches_some_allowed if {
 }
 
 doesnt_touch_other_modules if {
-	count(allowed_modules_addrs) >= 0
-
-	all_modules := [
-	res |
+	all_module_addrs := [
+	addr |
 		res := tfplan.resource_changes[_]
 		res.change.actions[_] != "no-op"
 		regex.match(`module\.`, res.module_address)
+		addr := res.module_address
 	]
 
-	all_modules_addrs := [
-	res |
-		res := all_modules[_].module_address
-	]
-
-	every m in all_modules_addrs {
+	every m in all_module_addrs {
+		print(m in allowed_modules_addrs)
 		m in allowed_modules_addrs
 	}
 }
 
 doesnt_touch_other_resources if {
-	count(allowed_resources_addrs) >= 0
-
-	all_resources := [
-	res |
-		res := tfplan.resource_changes[_]
-		not res.module_address
-	]
-
 	all_resource_addrs := [
-	res |
-		res := all_resources[_].address
+	addr |
+		res := tfplan.resource_changes[_]
+		res.change.actions[_] != "no-op"
+		not res.module_address
+		addr := res.address
 	]
 
 	every r in all_resource_addrs {
@@ -78,20 +68,16 @@ doesnt_touch_other_resources if {
 }
 
 touches_iam_create if {
-	all_iam := [
-	p |
+	all_iam_addrs := [
+	addr |
 		p := tfplan.resource_changes[_]
 		p.type in {"aws_iam_policy", "aws_iam_role_policy_attachment"}
 		change := p.change.actions[_]
 		change == "create"
+		addr := p.module_address
 	]
 
-	count(all_iam) > 0
-
-	all_iam_addrs := [
-	res |
-		res := all_iam[_].module_address
-	]
+	count(all_iam_addrs) > 0
 
 	every m in all_iam_addrs {
 		not m in allowed_modules_addrs
@@ -99,20 +85,16 @@ touches_iam_create if {
 }
 
 touches_iam_update if {
-	all_iam := [
-	p |
+	all_iam_addrs := [
+	addr |
 		p := tfplan.resource_changes[_]
 		p.type in {"aws_iam_policy", "aws_iam_role_policy_attachment"}
 		change := p.change.actions[_]
 		change == "update"
+		addr := p.module_address
 	]
 
-	count(all_iam) > 0
-
-	all_iam_addrs := [
-	res |
-		res := all_iam[_].module_address
-	]
+	count(all_iam_addrs) > 0
 
 	every m in all_iam_addrs {
 		not m in allowed_modules_addrs

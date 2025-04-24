@@ -6,6 +6,8 @@ default service_pod_ok := false
 
 default touches_iam := true
 
+default res := false
+
 allow := {
 	"valid": res,
 	"msg": msg,
