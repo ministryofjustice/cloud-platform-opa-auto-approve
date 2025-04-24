@@ -89,7 +89,7 @@ else
   -H "X-GitHub-Api-Version: 2022-11-28" \
   "https://api.github.com/repos/ministryofjustice/cloud-platform-environments/pulls/$PR/reviews" \
   -d '{
-    "body": ":white_check_mark: **Auto-Approved!**\n\nThis PR has **passed the [OPA auto approve policy](https://github.com/ministryofjustice/cloud-platform-opa-auto-approve) check and security validation**.\n\nYou can merge whenever suits you! :rocket:",
+    "body": ":white_check_mark: **Auto-Approved!**\n\nThis PR has **passed the [OPA auto approve](https://github.com/ministryofjustice/cloud-platform-opa-auto-approve) check and security validation**.\n\nYou can merge whenever suits you! :rocket:",
     "event": "APPROVE"
   }'
 fi
