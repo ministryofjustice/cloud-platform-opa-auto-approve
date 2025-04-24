@@ -5,7 +5,7 @@ import data.terraform.analysis
 test_deny_only_noop_sm if {
 	modified_plan := {
 		"address": "module.foobar.kubernetes_manifest.secret_store",
-    "module_address": "module.foobar",
+		"module_address": "module.foobar",
 		"change": {
 			"actions": ["no-op"],
 			"before": {"name": "jazz-test"},
@@ -21,7 +21,7 @@ test_deny_only_noop_sm if {
 test_allow_sm if {
 	modified_plan := {
 		"address": "module.foobar.kubernetes_manifest.secret_store",
-    "module_address": "module.foobar",
+		"module_address": "module.foobar",
 		"change": {
 			"actions": ["update"],
 			"before": {"name": "jazz-test"},
@@ -33,4 +33,3 @@ test_allow_sm if {
 	res.valid
 	res.msg == "Valid changes the PR meets the module allowlist criteria for auto approval"
 }
-

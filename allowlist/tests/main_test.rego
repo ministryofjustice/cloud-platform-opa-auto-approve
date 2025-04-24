@@ -25,24 +25,26 @@ test_deny_disallowed_module if {
 }
 
 test_deny_disallowed_module_with_allowed if {
-	modified_plan := [{
-		"module_address": "module.module",
-		"type": "aws_foobar_repository",
-		"change": {
-			"actions": ["update"],
-			"before": {"name": "jazz-test"},
-			"after": {"name": "jazz-test"},
+	modified_plan := [
+		{
+			"module_address": "module.module",
+			"type": "aws_foobar_repository",
+			"change": {
+				"actions": ["update"],
+				"before": {"name": "jazz-test"},
+				"after": {"name": "jazz-test"},
+			},
 		},
-	},
-	{
-		"address": "kubernetes_secret.test",
-		"type": "kubernetes_secret",
-		"change": {
-			"actions": ["update"],
-			"before": {"name": "jazz-test"},
-			"after": {"name": "jazz-test"},
+		{
+			"address": "kubernetes_secret.test",
+			"type": "kubernetes_secret",
+			"change": {
+				"actions": ["update"],
+				"before": {"name": "jazz-test"},
+				"after": {"name": "jazz-test"},
+			},
 		},
-	}]
+	]
 
 	res := analysis.allow with input as {"resource_changes": modified_plan}
 	not res.valid

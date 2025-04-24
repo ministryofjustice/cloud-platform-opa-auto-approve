@@ -15,10 +15,18 @@ allow := {
 
 res if {
 	irsa_ok
+	namespace_ok
 }
 
 msg := "Valid irsa related terraform changes" if {
 	irsa_ok
+	namespace_ok
+} else := "We can't auto approve these irsa terraform changes. Please request a Cloud Platform team member's review in [#ask-cloud-platform](https://moj.enterprise.slack.com/archives/C57UPMZLY)" if {
+	not irsa_ok
+	namespace_ok
+} else := "We can't auto approve these irsa terraform changes. Your are trying to modify resources in a different namespace. Please request a Cloud Platform team member's review in [#ask-cloud-platform](https://moj.enterprise.slack.com/archives/C57UPMZLY)" if {
+	irsa_ok
+	not namespace_ok
 } else := "We can't auto approve these irsa terraform changes. Please request a Cloud Platform team member's review in [#ask-cloud-platform](https://moj.enterprise.slack.com/archives/C57UPMZLY)"
 
 irsa := [
@@ -39,7 +47,10 @@ res |
 irsa_ok if {
 	every ma in irsa {
 		trimmed_addr := trim_left(ma, "module.")
-		role_policy_arns := tfplan.configuration.root_module.module_calls[trimmed_addr].expressions.role_policy_arns.references
+
+		expressions := tfplan.configuration.root_module.module_calls[trimmed_addr].expressions
+
+		role_policy_arns := expressions.role_policy_arns.references
 
 		count(role_policy_arns) > 0
 	}
@@ -54,3 +65,15 @@ irsa_ok if {
 	count(irsa) == 0
 	count(irsa_iam_assumable_role_module) == 0
 }
+
+namespace_ok if {
+	every ma in irsa {
+		trimmed_addr := trim_left(ma, "module.")
+
+		namespace_var(trimmed_addr) == tfplan.variables.namespace.value
+	}
+}
+
+namespace_var(addr) := tfplan.variables.namespace.value if {
+	tfplan.configuration.root_module.module_calls[addr].expressions.namespace.references[0] == "var.namespace"
+} else := tfplan.configuration.root_module.module_calls[addr].expressions.namespace.constant_value

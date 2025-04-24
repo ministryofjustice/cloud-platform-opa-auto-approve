@@ -10,6 +10,8 @@ default ecr_create_ok := false
 
 default ecr_destroy_ok := false
 
+default ecr_repo_rename_ok := false
+
 default res := false
 
 allow := {
@@ -20,6 +22,7 @@ allow := {
 res if {
 	ecr_create_ok
 	ecr_destroy_ok
+	namespace_ok
 }
 
 msg := "We can't auto approve these ECR terraform changes. Please request a Cloud Platform team member's review in [#ask-cloud-platform](https://moj.enterprise.slack.com/archives/C57UPMZLY)" if {
@@ -29,11 +32,14 @@ msg := "We can't auto approve these ECR terraform changes. Please request a Clou
 	not ecr_create_ok
 } else := "We can't auto approve these ECR terraform changes. Please request a Cloud Platform team member's review in [#ask-cloud-platform](https://moj.enterprise.slack.com/archives/C57UPMZLY)" if {
 	not ecr_destroy_ok
+} else := "We can't auto approve these ECR terraform changes. You're trying to modify a ECR not in your namespace. Please request a Cloud Platform team member's review in [#ask-cloud-platform](https://moj.enterprise.slack.com/archives/C57UPMZLY)" if {
+	not namespace_ok
 } else := "NOTE: Terraform `team_name` / `repo_name` change detected. ECR repository names cannot be updated in place to reflect these changes. [See here](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/other-topics/aws-resource-naming-issue.html)" if {
 	not ecr_repo_rename_ok
 } else := "Valid ECR related terraform changes" if {
 	ecr_create_ok
 	ecr_destroy_ok
+	namespace_ok
 }
 
 ecrs := [
@@ -60,6 +66,14 @@ ecr_create_ok if {
 
 	every ecr in creates {
 		is_ecr_create_valid(ecr)
+	}
+}
+
+namespace_ok if {
+	every ecr in ecrs {
+		trimmed_addr := trim_left(ecr.module_address, `module`)
+		trim_dot := trim_left(trimmed_addr, `\.`)
+		namespace_var(trim_dot) == tfplan.variables.namespace.value
 	}
 }
 
@@ -93,3 +107,7 @@ is_ecr_resource(res) if res.module_address in ecr_module_addrs
 get_repo_name(addr) := tfplan.variables.namespace.value if {
 	tfplan.configuration.root_module.module_calls[addr].expressions.repo_name.references[0] == "var.namespace"
 } else := tfplan.configuration.root_module.module_calls[addr].expressions.repo_name.constant_value[0]
+
+namespace_var(addr) := tfplan.variables.namespace.value if {
+	tfplan.configuration.root_module.module_calls[addr].expressions.namespace.references[0] == "var.namespace"
+} else := tfplan.configuration.root_module.module_calls[addr].expressions.namespace.constant_value
