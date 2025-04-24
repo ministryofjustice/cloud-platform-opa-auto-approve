@@ -4,9 +4,10 @@ import data.terraform.analysis
 
 test_allow_default if {
 	result := analysis.allow with input as {
-	"variables": {"team_name": {"value": "mikebell-test"}, "namespace": {"value": "mikebell-test"}},
-	"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}, "namespace": {"references": ["var.namespace"]}}}}}},
-	"resource_changes": ecr_create_mock_tfplan.resource_changes}
+		"variables": {"team_name": {"value": "mikebell-test"}, "namespace": {"value": "mikebell-test"}},
+		"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}, "namespace": {"references": ["var.namespace"]}}}}}},
+		"resource_changes": ecr_create_mock_tfplan.resource_changes,
+	}
 
 	result.valid
 	result.msg == "Valid ECR related terraform changes"
@@ -24,7 +25,7 @@ test_allow_if_op_update if {
 	}
 	res := analysis.allow with input as {
 		"variables": {"team_name": {"value": "jazz-test"}, "namespace": {"value": "jazz-test"}},
-	"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}, "namespace": {"references": ["var.namespace"]}}}}}},
+		"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}, "namespace": {"references": ["var.namespace"]}}}}}},
 		"resource_changes": [modified_plan],
 	}
 
@@ -45,7 +46,7 @@ test_allow_if_op_update_changes_name if {
 
 	res := analysis.allow with input as {
 		"variables": {"team_name": {"value": "var.namespace"}, "namespace": {"value": "wrong-one"}},
-	"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}, "namespace": {"references": ["var.namespace"]}}}}}},
+		"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}, "namespace": {"references": ["var.namespace"]}}}}}},
 		"resource_changes": [modified_plan, ecr_create_mock_tfplan.resource_changes],
 	}
 
@@ -97,7 +98,7 @@ test_allow_if_op_destroy if {
 
 	res := analysis.allow with input as {
 		"variables": {"team_name": {"value": "jazz-test"}, "namespace": {"value": "jazz-test"}},
-	"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}, "namespace": {"references": ["var.namespace"]}}}}}},
+		"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}, "namespace": {"references": ["var.namespace"]}}}}}},
 		"resource_changes": [modified_plan, ecr_create_mock_tfplan.resource_changes],
 	}
 	res.msg == "Valid ECR related terraform changes"
@@ -117,7 +118,7 @@ test_allow_if_op_destroy_with_no_protect if {
 
 	res := analysis.allow with input as {
 		"variables": {"team_name": {"value": "jazz-test"}, "namespace": {"value": "jazz-test"}},
-	"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}, "namespace": {"references": ["var.namespace"]}}}}}},
+		"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}, "namespace": {"references": ["var.namespace"]}}}}}},
 		"resource_changes": [modified_plan, ecr_create_mock_tfplan.resource_changes],
 	}
 	res.valid == true
@@ -161,7 +162,7 @@ test_allow_if_op_module_rename if {
 
 	res := analysis.allow with input as {
 		"variables": {"team_name": {"value": "changed"}, "namespace": {"value": "jazz-test"}},
-	"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}, "namespace": {"references": ["var.namespace"]}}}}}},
+		"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}, "namespace": {"references": ["var.namespace"]}}}}}},
 		"resource_changes": [modified_plan, ecr_create_mock_tfplan.resource_changes],
 	}
 
@@ -185,9 +186,10 @@ test_allow_if_hardcoded_namespace_var if {
 	}
 
 	result := analysis.allow with input as {
-	"variables": {"team_name": {"value": "jazz-test"}, "namespace": {"value": "jazz-test"}},
-	"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}, "namespace": {"constant_value": "jazz-test"}}}}}},
-	"resource_changes": [modified_plan]}
+		"variables": {"team_name": {"value": "jazz-test"}, "namespace": {"value": "jazz-test"}},
+		"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}, "namespace": {"constant_value": "jazz-test"}}}}}},
+		"resource_changes": [modified_plan],
+	}
 
 	result.valid
 	result.msg == "Valid ECR related terraform changes"
@@ -205,9 +207,10 @@ test_deny_if_hardcoded_namespace_var if {
 	}
 
 	result := analysis.allow with input as {
-	"variables": {"team_name": {"value": "jazz-test"}, "namespace": {"value": "jazz-test"}},
-	"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}, "namespace": {"constant_value": "wrong"}}}}}},
-	"resource_changes": [modified_plan]}
+		"variables": {"team_name": {"value": "jazz-test"}, "namespace": {"value": "jazz-test"}},
+		"configuration": {"root_module": {"module_calls": {"ecr": {"expressions": {"repo_name": {"references": ["var.namespace"]}, "namespace": {"constant_value": "wrong"}}}}}},
+		"resource_changes": [modified_plan],
+	}
 
 	not result.valid
 	result.msg == "We can't auto approve these ECR terraform changes. You're trying to modify a ECR not in your namespace. Please request a Cloud Platform team member's review in [#ask-cloud-platform](https://moj.enterprise.slack.com/archives/C57UPMZLY)"
