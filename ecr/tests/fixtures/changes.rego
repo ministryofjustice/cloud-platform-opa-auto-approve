@@ -15,7 +15,7 @@ ecr_create_mock_tfplan := {"resource_changes": [{
 			"force_delete": false,
 			"image_scanning_configuration": [{"scan_on_push": true}],
 			"image_tag_mutability": "MUTABLE",
-			"name": "mikebell-test",
+			"name": "mikebell-test/mikebell-test",
 			"repo_name": "mikebell-test",
 			"tags": {
 				"application": "mikebell-test",
