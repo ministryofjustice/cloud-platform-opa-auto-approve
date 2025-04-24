@@ -2,6 +2,17 @@ package test.terraform.analysis
 
 import data.terraform.analysis
 
+test_allow_if_no_sm_module if {
+	res := analysis.allow with input as {
+		"variables": mock_tfplan.variables,
+		"resource_changes": [],
+		"configuration": {"root_module": {"module_calls": {"secrets_manager": {"expressions": {"namespace": {"references": ["var.namespace"]}}}}}},
+	}
+
+	res.valid
+	res.msg == "Valid secrets manager related terraform changes"
+}
+
 test_allow_if_secret_create if {
 	res := analysis.allow with input as {
 		"variables": mock_tfplan.variables,
