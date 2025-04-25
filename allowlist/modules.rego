@@ -29,7 +29,7 @@ allowed_modules contains m if {
 allowed_modules contains m if {
 	m := tfplan.resource_changes[_]
 	m.change.actions[_] != "no-op"
-	regex.match(`^module\..*\.kubernetes_manifest.secret_store$`, m.address)
+	regex.match(`^module\..*\.aws_secretsmanager_secret.secret.*$`, m.address)
 }
 
 allowed_modules contains m if {

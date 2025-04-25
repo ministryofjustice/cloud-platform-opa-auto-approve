@@ -3,7 +3,7 @@ package test.terraform.analysis
 mock_tfplan := {
 	"variables": {"namespace": {"value": "jaskaran-dev"}},
 	"resource_changes": [{
-		"address": "module.secrets_manager.kubernetes_manifest.secret_store",
+		"address": "module.secrets_manager.aws_secretsmanager_secret.secret[\"secret_key_base\"]",
 		"module_address": "module.secrets_manager",
 		"mode": "managed",
 		"type": "kubernetes_manifest",

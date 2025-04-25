@@ -24,7 +24,7 @@ msg := "Valid secrets manager related terraform changes" if {
 secrets_manager_modules := [
 addr |
 	res := tfplan.resource_changes[_]
-	regex.match(`^module\..*\.kubernetes_manifest.secret_store$`, res.address)
+	regex.match(`^module\..*\.aws_secretsmanager_secret.secret.*$`, res.address)
 	res.change.actions[_] != "no-op"
 	addr := res.module_address
 ]
