@@ -48,7 +48,6 @@ doesnt_touch_other_modules if {
 	]
 
 	every m in all_module_addrs {
-		print(m in allowed_modules_addrs)
 		m in allowed_modules_addrs
 	}
 }
