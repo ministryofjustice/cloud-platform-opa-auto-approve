@@ -4,7 +4,7 @@ import data.terraform.analysis
 
 test_deny_only_noop_sm if {
 	modified_plan := {
-		"address": "module.foobar.kubernetes_manifest.secret_store",
+		"address": "module.foobar.aws_secretsmanager_secret.secret[\"random\"]",
 		"module_address": "module.foobar",
 		"change": {
 			"actions": ["no-op"],
@@ -20,7 +20,7 @@ test_deny_only_noop_sm if {
 
 test_allow_sm if {
 	modified_plan := {
-		"address": "module.foobar.kubernetes_manifest.secret_store",
+		"address": "module.foobar.aws_secretsmanager_secret.secret[\"random\"]",
 		"module_address": "module.foobar",
 		"change": {
 			"actions": ["update"],
