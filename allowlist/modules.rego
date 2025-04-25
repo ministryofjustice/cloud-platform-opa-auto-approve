@@ -32,4 +32,16 @@ allowed_modules contains m if {
 	regex.match(`^module\..*\.kubernetes_manifest.secret_store$`, m.address)
 }
 
+allowed_modules contains m if {
+	m := tfplan.resource_changes[_]
+	m.change.actions[_] != "no-op"
+	regex.match(`^module\..*\.module.service_account.kubernetes_role.github_actions_role$`, m.address)
+}
+
+allowed_modules contains m if {
+	m := tfplan.resource_changes[_]
+	m.change.actions[_] != "no-op"
+	regex.match(`^module\..*\.aws_sns_topic.new_topic$`, m.address)
+}
+
 allowed_modules_addrs := {arr | arr := allowed_modules[_].module_address}

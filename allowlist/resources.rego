@@ -26,4 +26,10 @@ allowed_resources contains r if {
 	r.type == `random_id`
 }
 
+allowed_resources contains r if {
+	r := tfplan.resource_changes[_]
+	r.change.actions[_] != "no-op"
+	r.type == "aws_sns_topic_subscription"
+}
+
 allowed_resources_addrs := {arr | arr := allowed_resources[_].address}
