@@ -11,22 +11,6 @@ terraform -chdir="$PLAN_DIR" show -json "$PLAN_NAME" > "$JSON_FILE"
 
 results=()
 
-for dir in cloud-platform-opa-auto-approve/*/;
-do
-    OUTPUT=$(opa exec --decision terraform/analysis/allow --bundle $dir "$JSON_FILE")
-    OPA_RESULT=$(echo "$OUTPUT" | jq -r '.result[0].result.valid')
-    OPA_MESSAGE=$(echo "$OUTPUT" | jq -r '.result[0].result.msg')
-    testname=$(echo "$dir" | sed 's/cloud\-platform\-opa\-auto\-approve\///g' | sed 's/\///g')
-    if [[ $OPA_RESULT == "true" ]]
-    then
-        testresult=":white_check_mark:"
-    else
-        testresult=":x:"
-    fi
-    results+=($testname";"$testresult";""$OPA_MESSAGE")
-
-done
-
 CHANGED_FILES=$(curl -L \
         -H "Accept: application/vnd.github+json" \
         -H "Authorization: Bearer $GITHUB_TOKEN" \
@@ -56,6 +40,23 @@ for f in $CHANGED_FILES; do
         exit 0
     fi
 done
+
+for dir in cloud-platform-opa-auto-approve/*/;
+do
+    OUTPUT=$(opa exec --decision terraform/analysis/allow --bundle $dir "$JSON_FILE")
+    OPA_RESULT=$(echo "$OUTPUT" | jq -r '.result[0].result.valid')
+    OPA_MESSAGE=$(echo "$OUTPUT" | jq -r '.result[0].result.msg')
+    testname=$(echo "$dir" | sed 's/cloud\-platform\-opa\-auto\-approve\///g' | sed 's/\///g')
+    if [[ $OPA_RESULT == "true" ]]
+    then
+        testresult=":white_check_mark:"
+    else
+        testresult=":x:"
+    fi
+    results+=($testname";"$testresult";""$OPA_MESSAGE")
+
+done
+
 
 if [[ ${results[@]} =~ ":x:" ]];
 then
