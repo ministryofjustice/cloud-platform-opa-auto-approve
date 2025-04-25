@@ -41,6 +41,29 @@ for f in $CHANGED_FILES; do
     fi
 done
 
+BRANCH_NAME=$(curl -L \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer $GITHUB_TOKEN" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+    "https://api.github.com/repos/ministryofjustice/cloud-platform-environments/pulls/$PR" | jq -r ".head.ref")
+
+BRANCH_STATUS_CHECKS=$(curl -L \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer $GITHUB_TOKEN" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+    "https://api.github.com/repos/ministryofjustice/cloud-platform-environments/commits/$BRANCH_NAME/check-runs")
+
+
+SUCCESSFUL_CHECKS=$(echo $BRANCH_STATUS_CHECKS | jq '.check_runs.[] | select(.conclusion == "success")' | jq -s '. | length')
+
+TOTAL_CHECKS=$(echo $BRANCH_STATUS_CHECKS | jq '.total_count')
+
+if [[ $SUCCESSFUL_CHECKS -ne $TOTAL_CHECKS ]]
+then
+    echo "Checks have not completed successfully, skipping auto approve"
+    exit 0
+fi
+
 for dir in cloud-platform-opa-auto-approve/*/;
 do
     OUTPUT=$(opa exec --decision terraform/analysis/allow --bundle $dir "$JSON_FILE")
@@ -56,7 +79,6 @@ do
     results+=($testname";"$testresult";""$OPA_MESSAGE")
 
 done
-
 
 if [[ ${results[@]} =~ ":x:" ]];
 then
