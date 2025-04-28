@@ -54,7 +54,7 @@ BRANCH_STATUS_CHECKS=$(curl -L \
     "https://api.github.com/repos/ministryofjustice/cloud-platform-environments/commits/$BRANCH_NAME/check-runs")
 
 
-SUCCESSFUL_CHECKS=$(echo $BRANCH_STATUS_CHECKS | jq '.check_runs.[] | select(.conclusion == "success")' | jq -s '. | length')
+SUCCESSFUL_CHECKS=$(echo $BRANCH_STATUS_CHECKS | jq '.check_runs[] | select(.conclusion == "success")' | jq -s '. | length')
 
 TOTAL_CHECKS=$(echo $BRANCH_STATUS_CHECKS | jq '.total_count')
 
