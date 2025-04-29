@@ -4,6 +4,11 @@ import future.keywords.every
 import input as tfplan
 
 default res := false
+default touches_some_allowed := false
+default doesnt_touch_other_resources := false
+default doesnt_touch_other_modules := false
+default touches_iam_create := true
+default touches_iam_update := true
 
 allow := {
 	"valid": res,
@@ -24,6 +29,12 @@ msg := "Valid changes the PR meets the module allowlist criteria for auto approv
 	doesnt_touch_other_modules
 	not touches_iam_create
 	not touches_iam_update
+} else := "This PR includes changes to modules / resources which are not on the allowlist, so we can't auto approve these changes. Please request a Cloud Platform team member's review in [#ask-cloud-platform](https://moj.enterprise.slack.com/archives/C57UPMZLY)" if {
+	not touches_some_allowed
+} else := "This PR includes changes to modules / resources which are not on the allowlist, so we can't auto approve these changes. Please request a Cloud Platform team member's review in [#ask-cloud-platform](https://moj.enterprise.slack.com/archives/C57UPMZLY)" if {
+	not doesnt_touch_other_resources
+} else := "This PR includes changes to modules / resources which are not on the allowlist, so we can't auto approve these changes. Please request a Cloud Platform team member's review in [#ask-cloud-platform](https://moj.enterprise.slack.com/archives/C57UPMZLY)" if {
+	not doesnt_touch_other_modules
 } else := "This PR includes create changes to IAM that are not covered by our module allowlist, so we can't auto approve this PR. Please request a Cloud Platform team member's review in [#ask-cloud-platform](https://moj.enterprise.slack.com/archives/C57UPMZLY)" if {
 	touches_iam_create
 } else := "This PR includes update changes to IAM that are not covered by our module allowlist, so we can't auto approve this PR. Please request a Cloud Platform team member's review in [#ask-cloud-platform](https://moj.enterprise.slack.com/archives/C57UPMZLY)" if {
@@ -66,7 +77,7 @@ doesnt_touch_other_resources if {
 	}
 }
 
-touches_iam_create if {
+touches_iam_create := false if {
 	all_iam_addrs := [
 	addr |
 		p := tfplan.resource_changes[_]
@@ -76,14 +87,14 @@ touches_iam_create if {
 		addr := p.module_address
 	]
 
-	count(all_iam_addrs) > 0
+	count(all_iam_addrs) == 0
 
 	every m in all_iam_addrs {
-		not m in allowed_modules_addrs
+		m in allowed_modules_addrs
 	}
 }
 
-touches_iam_update if {
+touches_iam_update := false if {
 	all_iam_addrs := [
 	addr |
 		p := tfplan.resource_changes[_]
@@ -93,9 +104,9 @@ touches_iam_update if {
 		addr := p.module_address
 	]
 
-	count(all_iam_addrs) > 0
+	count(all_iam_addrs) == 0
 
 	every m in all_iam_addrs {
-		not m in allowed_modules_addrs
+		m in allowed_modules_addrs
 	}
 }

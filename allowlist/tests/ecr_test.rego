@@ -3,7 +3,7 @@ package test.terraform.analysis
 import data.terraform.analysis
 
 test_deny_only_noop_ecr if {
-	modified_plan := {
+	modified_plan := [{
 		"address": "module.ecr.foobar",
 		"module_address": "module.ecr",
 		"type": "aws_ecr_repository",
@@ -12,9 +12,19 @@ test_deny_only_noop_ecr if {
 			"before": {"name": "jazz-test"},
 			"after": {"name": "jazz-test"},
 		},
-	}
+	},
+{
+		"address": "module.fake.foobar",
+		"module_address": "module.fake",
+		"type": "aws_ecr_fake",
+		"change": {
+			"actions": ["create"],
+			"before": {"name": "jazz-test"},
+			"after": {"name": "jazz-test"},
+		},
+	}]
 
-	res := analysis.allow with input as {"resource_changes": [modified_plan]}
+	res := analysis.allow with input as {"resource_changes": modified_plan}
 	not res.valid
 	res.msg == "This PR includes changes to modules / resources which are not on the allowlist, so we can't auto approve these changes. Please request a Cloud Platform team member's review in [#ask-cloud-platform](https://moj.enterprise.slack.com/archives/C57UPMZLY)"
 }
