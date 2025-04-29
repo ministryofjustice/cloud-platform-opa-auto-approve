@@ -4,6 +4,18 @@ import data.terraform.analysis
 
 test_deny_only_noop_irsa if {
 	modified_plan := [
+{
+			"address": "module.ap_irsa.kubernetes_service_account.fake",
+			"module_address": "module.irsa_fake",
+			"mode": "managed",
+			"type": "kubernetes_service_account",
+			"name": "generated_sa",
+			"provider_name": "registry.terraform.io/hashicorp/kubernetes",
+			"change": {
+				"actions": ["create"],
+				"before": null,
+			},
+		},
 		{
 			"address": "module.ap_irsa.kubernetes_service_account.generated_sa",
 			"module_address": "module.ap_irsa",

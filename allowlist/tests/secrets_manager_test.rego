@@ -3,7 +3,7 @@ package test.terraform.analysis
 import data.terraform.analysis
 
 test_deny_only_noop_sm if {
-	modified_plan := {
+	modified_plan := [{
 		"address": "module.foobar.aws_secretsmanager_secret.secret[\"random\"]",
 		"module_address": "module.foobar",
 		"change": {
@@ -11,9 +11,18 @@ test_deny_only_noop_sm if {
 			"before": {"name": "jazz-test"},
 			"after": {"name": "jazz-test"},
 		},
-	}
+	},
+{
+		"address": "module.fake.aws_secretsmanager_fake",
+		"module_address": "module.fake",
+		"change": {
+			"actions": ["update"],
+			"before": {"name": "jazz-test"},
+			"after": {"name": "jazz-test"},
+		},
+	}]
 
-	res := analysis.allow with input as {"resource_changes": [modified_plan]}
+	res := analysis.allow with input as {"resource_changes": modified_plan}
 	not res.valid
 	res.msg == "This PR includes changes to modules / resources which are not on the allowlist, so we can't auto approve these changes. Please request a Cloud Platform team member's review in [#ask-cloud-platform](https://moj.enterprise.slack.com/archives/C57UPMZLY)"
 }
