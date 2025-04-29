@@ -72,6 +72,58 @@ test_allow_if_noop if {
 	res.msg == "Valid K8s secret related terraform changes"
 }
 
+test_allow_if_delete if {
+	modified_plan := {
+		"address": "kubernetes_secret.jasky-test",
+		"mode": "managed",
+		"type": "kubernetes_secret",
+		"name": "jasky-test",
+		"provider_name": "registry.terraform.io/hashicorp/kubernetes",
+		"change": {
+			"actions": ["delete"],
+			"before": null,
+			"after": {
+				"binary_data": null,
+				"binary_data_wo": null,
+				"binary_data_wo_revision": null,
+				"data": {"url": "test.com"},
+				"data_wo": null,
+				"data_wo_revision": null,
+				"immutable": null,
+				"metadata": [{
+					"annotations": null,
+					"generate_name": null,
+					"labels": null,
+					"name": "j-secret",
+				}],
+				"timeouts": null,
+				"type": "Opaque",
+				"wait_for_service_account_token": true,
+			},
+			"after_unknown": {
+				"data": {},
+				"id": true,
+				"metadata": [{
+					"generation": true,
+					"resource_version": true,
+					"uid": true,
+				}],
+			},
+			"before_sensitive": false,
+			"after_sensitive": {
+				"binary_data": true,
+				"data": true,
+				"metadata": [{}],
+			},
+		},
+	}
+
+	res := analysis.allow with input as {"variables": mock_tfplan.variables, "resource_changes": [modified_plan, mock_tfplan.resource_changes[0]]}
+	res.valid
+	res.msg == "Valid K8s secret related terraform changes"
+
+}
+
 test_deny_if_secret_cross_namespace if {
 	modified_plan := {"namespace": {"value": "wrong"}}
 
@@ -111,3 +163,56 @@ test_deny_if_secret_v1_create_is_invalid_but_secret_is_valid if {
 	not res.valid
 	res.msg == "We can't auto approve these kubernetes secret terraform changes. Please request a Cloud Platform team member's review in [#ask-cloud-platform](https://moj.enterprise.slack.com/archives/C57UPMZLY)"
 }
+
+test_allow_v1_if_delete if {
+	modified_plan := {
+		"address": "kubernetes_secret_v1.jasky-test",
+		"mode": "managed",
+		"type": "kubernetes_secret",
+		"name": "jasky-test",
+		"provider_name": "registry.terraform.io/hashicorp/kubernetes",
+		"change": {
+			"actions": ["delete"],
+			"before": null,
+			"after": {
+				"binary_data": null,
+				"binary_data_wo": null,
+				"binary_data_wo_revision": null,
+				"data": {"url": "test.com"},
+				"data_wo": null,
+				"data_wo_revision": null,
+				"immutable": null,
+				"metadata": [{
+					"annotations": null,
+					"generate_name": null,
+					"labels": null,
+					"name": "j-secret",
+				}],
+				"timeouts": null,
+				"type": "Opaque",
+				"wait_for_service_account_token": true,
+			},
+			"after_unknown": {
+				"data": {},
+				"id": true,
+				"metadata": [{
+					"generation": true,
+					"resource_version": true,
+					"uid": true,
+				}],
+			},
+			"before_sensitive": false,
+			"after_sensitive": {
+				"binary_data": true,
+				"data": true,
+				"metadata": [{}],
+			},
+		},
+	}
+
+	res := analysis.allow with input as {"variables": mock_tfplan.variables, "resource_changes": [modified_plan, mock_tfplan.resource_changes[0]]}
+	res.valid
+	res.msg == "Valid K8s secret related terraform changes"
+
+}
+
