@@ -18,9 +18,15 @@ res if {
 	namespace_ok
 }
 
+res if {
+	irsa_submodule_ok
+}
+
 msg := "Valid irsa related terraform changes" if {
 	irsa_ok
 	namespace_ok
+} else := "Valid irsa related terraform changes" if {
+	irsa_submodule_ok
 } else := "We can't auto approve these irsa terraform changes. Please request a Cloud Platform team member's review in [#ask-cloud-platform](https://moj.enterprise.slack.com/archives/C57UPMZLY)" if {
 	not irsa_ok
 	namespace_ok
@@ -46,7 +52,7 @@ res |
 
 irsa_ok if {
 	every ma in irsa {
-		trimmed_addr := trim_left(ma, "module.")
+		trimmed_addr := regex.split(`\.`, ma)[1]
 
 		expressions := tfplan.configuration.root_module.module_calls[trimmed_addr].expressions
 
@@ -59,6 +65,18 @@ irsa_ok if {
 	some addr in irsa
 
 	regex.match(addr, a.module_address)
+}
+
+irsa_submodule_ok if {
+	every ma in irsa {
+		trimmed_addr := regex.split(`\.`, ma)
+		filtered_mod_arr := [
+		mod |
+			mod := trimmed_addr[_]
+			mod == "module"
+		]
+		count(filtered_mod_arr) > 1
+	}
 }
 
 irsa_ok if {
