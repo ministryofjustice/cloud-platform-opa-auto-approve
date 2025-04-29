@@ -33,6 +33,7 @@ k8s_secret_ok if {
 		res := tfplan.resource_changes[_]
 		res.type == "kubernetes_secret"
 		res.change.actions[_] != "no-op"
+		res.change.actions[_] != "delete"
 	]
 
 	every s in k8s_secrets {
@@ -46,6 +47,7 @@ k8s_secret_v1_ok if {
 		res := tfplan.resource_changes[_]
 		res.type == "kubernetes_secret_v1"
 		res.change.actions[_] != "no-op"
+		res.change.actions[_] != "delete"
 	]
 
 	every s in k8s_secrets_v1 {
