@@ -90,3 +90,13 @@ test_allow_hard_coded_correct_ns if {
 	result.valid
 	result.msg == "Valid irsa related terraform changes"
 }
+
+test_allow_irsa_if_called_by_another_module if {
+	result := analysis.allow with input as {
+		"variables": {"namespace": {"value": "testing-ns"}},
+		"resource_changes": submodule_irsa.resource_changes,
+		"configuration": {"root_module": {"module_calls": {"ap_irsa": {"expressions": {"namespace": {"constant_value": "testing-ns"}, "role_policy_arns": {"references": ["var.foobar"]}}}}}},
+	}
+	result.valid
+	result.msg == "Valid irsa related terraform changes"
+}

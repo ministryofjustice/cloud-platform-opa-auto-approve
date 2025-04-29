@@ -1025,3 +1025,46 @@ irsa_mismatch_create_mock_tfplan := {"resource_changes": [
 		},
 	},
 ]}
+
+submodule_irsa := {"resource_changes": [{
+	"address": "module.secrets_manager.module.irsa.kubernetes_service_account.generated_sa",
+	"module_address": "module.secrets_manager.module.irsa",
+	"mode": "managed",
+	"type": "kubernetes_service_account",
+	"name": "generated_sa",
+	"provider_name": "registry.terraform.io/hashicorp/kubernetes",
+	"change": {
+		"actions": ["create"],
+		"before": null,
+		"after": {
+			"automount_service_account_token": true,
+			"image_pull_secret": [],
+			"metadata": [{
+				"generate_name": null,
+				"labels": null,
+				"namespace": "jaskaran-dev",
+			}],
+			"secret": [],
+			"timeouts": null,
+		},
+		"after_unknown": {
+			"default_secret_name": true,
+			"id": true,
+			"image_pull_secret": [],
+			"metadata": [{
+				"annotations": true,
+				"generation": true,
+				"name": true,
+				"resource_version": true,
+				"uid": true,
+			}],
+			"secret": [],
+		},
+		"before_sensitive": false,
+		"after_sensitive": {
+			"image_pull_secret": [],
+			"metadata": [{"annotations": {}}],
+			"secret": [],
+		},
+	},
+}]}
