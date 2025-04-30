@@ -58,11 +58,20 @@ SUCCESSFUL_CHECKS=$(echo $BRANCH_STATUS_CHECKS | jq '.check_runs[] | select(.con
 
 TOTAL_CHECKS=$(echo $BRANCH_STATUS_CHECKS | jq '.total_count')
 
-if [[ $SUCCESSFUL_CHECKS -ne $TOTAL_CHECKS ]]
-then
-    echo "Checks have not completed successfully, skipping auto approve"
-    exit 0
-fi
+for i in 1 2 3 4 5; do
+    if [[ $SUCCESSFUL_CHECKS -ne $TOTAL_CHECKS ]]
+    then
+        if [[ i -eq 5 ]]
+        then
+            echo "Checks have not completed successfully, skipping auto approve"
+            exit 0
+        fi
+        echo "Checks have not completed retrying ${i}/5"
+        sleep 60
+    fi
+    echo "${SUCCESSFUL_CHECKS} Successful / ${TOTAL_CHECKS} Total Checks. All Checks have passed"
+    break
+done
 
 for dir in cloud-platform-opa-auto-approve/*/;
 do
