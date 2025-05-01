@@ -6,6 +6,10 @@ The **OPA Auto Approve Policy** framework automates the validation and approval 
 
 ### Key Workflows
 
+Ensure you have opa version 1.0.0 installed locally
+
+Keep any example `plan.json` files you are testing against in the root dir. Opa throws a strange error when it is at the same level as any rego.
+
 1. **OPA Validation Against Terraform Plans**:
 
    - Validates PRs with Terraform changes using the `plan-live` job in the Concourse CI pipeline.
