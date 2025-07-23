@@ -11,7 +11,7 @@ JSON_FILE="${PLAN_NAME%.out}.json"
 
 terraform -chdir="$PLAN_DIR" show -json "$PLAN_NAME" > "$JSON_FILE"
 
-cat $JSON_FILE | jq --arg ns_contains_skip_file $NAMESPACE_CONTAINS_SKIP_FILE '. + {namespace_contains_skip_file: $namesspace_contains_skip_file}' > $JSON_FILE
+cat $JSON_FILE | jq --arg ns_contains_skip_file $NAMESPACE_CONTAINS_SKIP_FILE '. + {namespace_contains_skip_file: $ns_contains_skip_file}' > $JSON_FILE
 
 results=()
 
