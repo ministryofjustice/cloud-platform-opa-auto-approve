@@ -37,4 +37,9 @@ allowed_modules contains m if {
 	regex.match(`^module\..*\.aws_sns_topic.new_topic$`, m.address)
 }
 
+allowed_modules contains m if {
+	m := tfplan.resource_changes[_]
+	regex.match(`^module\..*\.aws_db_instance.rds$`, m.address)
+}
+
 allowed_modules_addrs := {arr | arr := allowed_modules[_].module_address}
