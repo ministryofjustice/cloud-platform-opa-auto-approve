@@ -67,7 +67,7 @@ for i in 1 2 3 4 5; do
     if [[ -z "$SUCCESSFUL_CHECKS" || -z "$TOTAL_CHECKS" || \
           "$SUCCESSFUL_CHECKS" == "null" || "$TOTAL_CHECKS" == "null" ]]
     then
-        echo "Checks have not completed successfully, skipping auto approve"
+        echo "Null variable in auto_approve.sh, skipping auto approve"
         exit 0
     fi
 
