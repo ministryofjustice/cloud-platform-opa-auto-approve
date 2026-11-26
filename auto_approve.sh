@@ -63,9 +63,17 @@ SUCCESSFUL_CHECKS=$(echo $BRANCH_STATUS_CHECKS | jq '.check_runs[] | select(.con
 TOTAL_CHECKS=$(echo $BRANCH_STATUS_CHECKS | jq '.total_count')
 
 for i in 1 2 3 4 5; do
+
+    if [[ -z "$SUCCESSFUL_CHECKS" || -z "$TOTAL_CHECKS" || \
+          "$SUCCESSFUL_CHECKS" == "null" || "$TOTAL_CHECKS" == "null" ]]
+    then
+        echo "Checks have not completed successfully, skipping auto approve"
+        exit 0
+    fi
+
     if [[ $SUCCESSFUL_CHECKS -ne $TOTAL_CHECKS ]]
     then
-        if [[ i -eq 5 ]]
+        if [[ $i -eq 5 ]]
         then
             echo "Checks have not completed successfully, skipping auto approve"
             exit 0
@@ -73,6 +81,7 @@ for i in 1 2 3 4 5; do
         echo "Checks have not completed retrying ${i}/5"
         sleep 60
     fi
+
     echo "${SUCCESSFUL_CHECKS} Successful / ${TOTAL_CHECKS} Total Checks. All Checks have passed"
     break
 done
